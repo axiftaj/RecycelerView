@@ -1,14 +1,17 @@
 package com.example.recuclerview.MyAdapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.recuclerview.HomeActivity;
 import com.example.recuclerview.Model.RowModel;
 import com.example.recuclerview.R;
 
@@ -51,7 +54,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyHolder>{
         return modelList.size();
     }
 
-    class MyHolder extends RecyclerView.ViewHolder{
+    class MyHolder extends RecyclerView.ViewHolder  implements  View.OnClickListener{
 
         CircleImageView imageView ;
         TextView name, message ;
@@ -61,7 +64,16 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyHolder>{
             imageView = itemView.findViewById(R.id.profile_image);
             name = itemView.findViewById(R.id.name);
             message = itemView.findViewById(R.id.message);
+            itemView.setOnClickListener(this);
+        }
 
+        @Override
+        public void onClick(View v) {
+            int postion = getAdapterPosition();
+            Toast.makeText(context, "postion"+postion, Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(context , HomeActivity.class);
+            intent.putExtra("name" , modelList.get(postion).getName());
+            context.startActivity(intent);
 
         }
     }
