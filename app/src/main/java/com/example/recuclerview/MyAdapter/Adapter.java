@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,18 +17,21 @@ import com.example.recuclerview.HomeActivity;
 import com.example.recuclerview.Model.RowModel;
 import com.example.recuclerview.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class Adapter extends RecyclerView.Adapter<Adapter.MyHolder>{
+public class Adapter extends RecyclerView.Adapter<Adapter.MyHolder> implements Filterable {
 
     Context context;
     List<RowModel> modelList ;
+    List<RowModel> modelListFilter ;
 
     public Adapter(Context context, List<RowModel> modelList) {
         this.context = context;
         this.modelList = modelList;
+        this.modelListFilter = modelList ;
     }
 
     @NonNull
@@ -39,9 +44,9 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyHolder>{
     @Override
     public void onBindViewHolder(@NonNull MyHolder holder, int position) {
 
-        String name = modelList.get(position).getName();
-        String messages  = modelList.get(position).getMessage();
-        int image = modelList.get(position).getImage();
+        String name = modelListFilter.get(position).getName();
+        String messages  = modelListFilter.get(position).getMessage();
+        int image = modelListFilter.get(position).getImage();
 
         holder.name.setText(name);
         holder.message.setText(messages);
@@ -51,8 +56,40 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyHolder>{
 
     @Override
     public int getItemCount() {
-        return modelList.size();
+        return modelListFilter.size();
     }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                String charcater = constraint.toString();
+                if (charcater.isEmpty()){
+                    modelListFilter = modelList ;
+                }else {
+                    List<RowModel> filterList = new ArrayList<>();
+                    for (RowModel row: modelList){
+                        if (row.getName().toLowerCase().contains(charcater.toLowerCase())){
+                            filterList.add(row);
+                        }
+                    }
+
+                    modelListFilter = filterList ;
+                }
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = modelListFilter;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                modelListFilter = (ArrayList<RowModel>) results.values ;
+                notifyDataSetChanged();
+            }
+        };
+    }
+
 
     class MyHolder extends RecyclerView.ViewHolder  implements  View.OnClickListener{
 
@@ -72,7 +109,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyHolder>{
             int postion = getAdapterPosition();
             Toast.makeText(context, "postion"+postion, Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(context , HomeActivity.class);
-            intent.putExtra("name" , modelList.get(postion).getName());
+            intent.putExtra("name" , modelListFilter.get(postion).getName());
             context.startActivity(intent);
 
         }
